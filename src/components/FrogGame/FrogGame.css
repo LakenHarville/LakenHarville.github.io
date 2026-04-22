@@ -101,7 +101,7 @@
 }
 
 .instructions-intro {
-  color: #8b949e;
+  color: #b8c4cf;
   font-size: 0.95rem;
   margin-bottom: 28px;
 }
@@ -124,7 +124,7 @@
 
 .control-item span {
   font-size: 0.8rem;
-  color: #5a6370;
+  color: #8b949e;
 }
 
 .key-group {
@@ -176,7 +176,7 @@ kbd.key-wide {
 
 .feature-item {
   font-size: 0.85rem;
-  color: #8b949e;
+  color: #b8c4cf;
   line-height: 1.5;
 }
 
@@ -274,7 +274,7 @@ kbd.key-wide {
   font-size: 0.75rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: #5a6370;
+  color: #8b949e;
   margin-bottom: 4px;
 }
 
@@ -283,7 +283,7 @@ kbd.key-wide {
   align-items: center;
   gap: 8px;
   font-size: 0.8rem;
-  color: #8b949e;
+  color: #b8c4cf;
 }
 
 .legend-dot {
@@ -318,7 +318,7 @@ kbd.key-wide {
 
 .color-label {
   font-size: 0.75rem;
-  color: #5a6370;
+  color: #8b949e;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -338,7 +338,7 @@ kbd.key-wide {
   border-radius: 10px;
   pointer-events: none;
   font-size: 0.75rem;
-  color: #5a6370;
+  color: #8b949e;
 }
 
 .controls-reminder kbd {
