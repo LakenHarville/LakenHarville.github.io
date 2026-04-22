@@ -1,0 +1,43 @@
+/* ============================================
+   MUSIC TOGGLE BUTTON
+   
+   A small, unobtrusive floating button in the 
+   bottom-right corner. Users can mute if they 
+   don't want the background music.
+   ============================================ */
+
+.music-toggle-btn {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1001;
+  width: 42px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(6, 8, 13, 0.85);
+  backdrop-filter: blur(10px);
+  border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.06));
+  border-radius: 50%;
+  color: var(--text-secondary, #8b949e);
+  cursor: pointer;
+  transition: all var(--transition-base, 300ms) ease;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+}
+
+.music-toggle-btn:hover {
+  color: var(--accent-primary, #00e87b);
+  border-color: var(--accent-primary, #00e87b);
+  transform: scale(1.08);
+}
+
+/* Hide on mobile to avoid overlap with navbar/UI */
+@media (max-width: 480px) {
+  .music-toggle-btn {
+    bottom: 16px;
+    right: 16px;
+    width: 38px;
+    height: 38px;
+  }
+}

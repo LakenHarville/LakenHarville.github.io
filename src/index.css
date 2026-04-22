@@ -1,0 +1,245 @@
+/* ============================================
+   DESIGN SYSTEM — Global Variables & Reset
+   
+   Think of CSS variables like constants in a 
+   programming language. Define them once at the 
+   root, reference everywhere. Change the value 
+   here → changes propagate site-wide instantly.
+   ============================================ */
+
+:root {
+  /* Color Palette — Dark cyberpunk meets nature (frog green!) */
+  --bg-primary: #06080d;
+  --bg-secondary: #0d1117;
+  --bg-card: #131921;
+  --bg-elevated: #1a2233;
+  
+  --accent-primary: #00e87b;     /* Neon frog green */
+  --accent-primary-dim: #00c468;
+  --accent-secondary: #4d7aff;   /* Electric blue */
+  --accent-tertiary: #a855f7;    /* Purple highlight */
+  
+  --text-primary: #e6edf3;
+  --text-secondary: #8b949e;
+  --text-muted: #5a6370;
+  
+  --border-subtle: rgba(255, 255, 255, 0.06);
+  --border-accent: rgba(0, 232, 123, 0.2);
+  
+  /* Typography */
+  --font-display: 'Syne', sans-serif;
+  --font-body: 'DM Sans', sans-serif;
+  
+  /* Spacing scale */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+  --space-2xl: 3rem;
+  --space-3xl: 4rem;
+  --space-4xl: 6rem;
+  
+  /* Transitions */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 500ms cubic-bezier(0.4, 0, 0.2, 1);
+  
+  /* Border radius */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  
+  /* Shadows */
+  --shadow-glow: 0 0 20px rgba(0, 232, 123, 0.15);
+  --shadow-card: 0 4px 24px rgba(0, 0, 0, 0.4);
+}
+
+/* ============================================
+   CSS RESET — Normalize browser defaults
+   
+   Browsers have wildly different default styles.
+   This reset ensures every element starts from 
+   the same baseline, like zeroing out a scale 
+   before measuring.
+   ============================================ */
+
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  font-size: 16px;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+a {
+  color: var(--accent-primary);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+a:hover {
+  color: var(--accent-secondary);
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+/* ============================================
+   UTILITY CLASSES
+   ============================================ */
+
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--space-lg);
+}
+
+.section-title {
+  font-size: clamp(2rem, 5vw, 3rem);
+  margin-bottom: var(--space-xl);
+  color: var(--text-primary);
+}
+
+.section-title .accent {
+  color: var(--accent-primary);
+}
+
+/* Page wrapper for all content pages */
+.page-wrapper {
+  min-height: 100vh;
+  padding-top: 100px; /* space for fixed navbar */
+  padding-bottom: var(--space-4xl);
+}
+
+/* Content cards used across pages */
+.content-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: var(--space-2xl);
+  transition: border-color var(--transition-base), box-shadow var(--transition-base);
+}
+
+.content-card:hover {
+  border-color: var(--border-accent);
+  box-shadow: var(--shadow-glow);
+}
+
+/* Animated gradient text */
+.gradient-text {
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary), var(--accent-tertiary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Tag pills used on Projects and Interests pages */
+.tag {
+  display: inline-block;
+  padding: var(--space-xs) var(--space-md);
+  background: rgba(0, 232, 123, 0.08);
+  border: 1px solid rgba(0, 232, 123, 0.15);
+  border-radius: 100px;
+  font-size: 0.8rem;
+  color: var(--accent-primary);
+  font-weight: 500;
+}
+
+/* ============================================
+   ANIMATIONS — Keyframe library
+   
+   Keyframes define the "choreography" of an 
+   animation. Think of them as a flipbook — you 
+   define key poses (0%, 100%) and the browser 
+   interpolates the frames in between.
+   ============================================ */
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(0, 232, 123, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 40px rgba(0, 232, 123, 0.4);
+  }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.6s ease-out forwards;
+  opacity: 0;
+}
+
+/* Stagger delays for sequential animations */
+.delay-1 { animation-delay: 0.1s; }
+.delay-2 { animation-delay: 0.2s; }
+.delay-3 { animation-delay: 0.3s; }
+.delay-4 { animation-delay: 0.4s; }
+.delay-5 { animation-delay: 0.5s; }
+
+/* ============================================
+   RESPONSIVE BREAKPOINTS
+   
+   Mobile-first approach: base styles are for 
+   small screens, then we ADD complexity for 
+   larger ones. Like building with LEGOs — start 
+   with the foundation, add more blocks as you 
+   have more space.
+   ============================================ */
+
+@media (max-width: 768px) {
+  :root {
+    font-size: 14px;
+  }
+  
+  .container {
+    padding: 0 var(--space-md);
+  }
+  
+  .page-wrapper {
+    padding-top: 80px;
+  }
+}

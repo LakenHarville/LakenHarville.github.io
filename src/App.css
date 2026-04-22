@@ -1,0 +1,64 @@
+/* ============================================
+   APP LAYOUT & BACKGROUND EFFECTS
+   
+   The background orbs use CSS radial-gradient + 
+   animation. They're positioned with `position: fixed`
+   so they don't scroll with content — creating a 
+   parallax-like depth illusion. The `filter: blur()`
+   softens them into ambient light pools.
+   ============================================ */
+
+.app {
+  position: relative;
+  min-height: 100vh;
+}
+
+.bg-effects {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none; /* Critical: lets clicks pass through to content */
+  z-index: 0;
+  overflow: hidden;
+}
+
+.bg-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(120px);
+  opacity: 0.15;
+}
+
+.bg-orb-1 {
+  width: 600px;
+  height: 600px;
+  background: var(--accent-primary);
+  top: -200px;
+  right: -100px;
+  animation: float 20s ease-in-out infinite;
+}
+
+.bg-orb-2 {
+  width: 400px;
+  height: 400px;
+  background: var(--accent-secondary);
+  bottom: -100px;
+  left: -100px;
+  animation: float 25s ease-in-out infinite reverse;
+}
+
+.bg-orb-3 {
+  width: 300px;
+  height: 300px;
+  background: var(--accent-tertiary);
+  top: 50%;
+  left: 50%;
+  animation: float 18s ease-in-out infinite 5s;
+}
+
+main {
+  position: relative;
+  z-index: 1; /* Ensures content renders above background orbs */
+}

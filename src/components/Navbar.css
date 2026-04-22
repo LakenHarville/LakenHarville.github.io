@@ -1,0 +1,195 @@
+/* ============================================
+   NAVBAR STYLES
+   
+   The navbar uses `position: fixed` so it stays 
+   at the top as you scroll. The `backdrop-filter: blur()`
+   creates the frosted glass effect — a modern CSS 
+   property that blurs whatever is BEHIND the element.
+   Think of it like looking through a frosted window.
+   ============================================ */
+
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
+  padding: var(--space-md) 0;
+  transition: all var(--transition-base);
+}
+
+/* When scrolled, add the frosted glass effect */
+.navbar.scrolled {
+  background: rgba(6, 8, 13, 0.85);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border-subtle);
+  padding: var(--space-sm) 0;
+}
+
+.navbar-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--space-lg);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* ---- Brand / Logo ---- */
+
+.navbar-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  text-decoration: none;
+}
+
+.navbar-brand:hover {
+  color: var(--text-primary);
+}
+
+.brand-icon {
+  font-size: 1.6rem;
+  transition: transform var(--transition-base);
+}
+
+.navbar-brand:hover .brand-icon {
+  transform: rotate(-15deg) scale(1.1);
+}
+
+.brand-text .accent {
+  color: var(--accent-primary);
+}
+
+/* ---- Navigation Links ---- */
+
+.navbar-links {
+  display: flex;
+  align-items: center;
+  gap: var(--space-xs);
+}
+
+.nav-link {
+  position: relative;
+  padding: var(--space-sm) var(--space-md);
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+  text-decoration: none;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+}
+
+.nav-link:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.nav-link.active {
+  color: var(--accent-primary);
+}
+
+.active-dot {
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  background: var(--accent-primary);
+  border-radius: 50%;
+  box-shadow: 0 0 8px var(--accent-primary);
+}
+
+/* ---- Hamburger Button ---- */
+/* 
+   The hamburger is built from 3 <span> elements.
+   CSS transforms handle the open/close animation.
+   This is more performant than JS animation because
+   `transform` and `opacity` are handled by the GPU.
+*/
+
+.hamburger {
+  display: none; /* Hidden on desktop */
+  flex-direction: column;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: var(--space-sm);
+  z-index: 1001;
+}
+
+.hamburger span {
+  display: block;
+  width: 24px;
+  height: 2px;
+  background: var(--text-primary);
+  border-radius: 2px;
+  transition: all var(--transition-base);
+  transform-origin: center;
+}
+
+/* Animate to X when open */
+.hamburger.open span:nth-child(1) {
+  transform: rotate(45deg) translate(5px, 5px);
+}
+
+.hamburger.open span:nth-child(2) {
+  opacity: 0;
+  transform: scaleX(0);
+}
+
+.hamburger.open span:nth-child(3) {
+  transform: rotate(-45deg) translate(5px, -5px);
+}
+
+/* ============================================
+   MOBILE STYLES (768px and below)
+   
+   On mobile, the nav links become a full-screen 
+   overlay. The `transform: translateX(100%)` slides 
+   it off-screen to the right, and `translateX(0)` 
+   slides it back in. This is buttery smooth because 
+   `transform` is a GPU-accelerated property.
+   ============================================ */
+
+@media (max-width: 768px) {
+  .hamburger {
+    display: flex;
+  }
+
+  .navbar-links {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 280px;
+    height: 100vh;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    gap: var(--space-sm);
+    padding: var(--space-2xl);
+    background: rgba(6, 8, 13, 0.97);
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
+    border-left: 1px solid var(--border-subtle);
+    transform: translateX(100%);
+    transition: transform var(--transition-base);
+  }
+
+  .navbar-links.open {
+    transform: translateX(0);
+  }
+
+  .nav-link {
+    font-size: 1.2rem;
+    padding: var(--space-md);
+    width: 100%;
+  }
+}
