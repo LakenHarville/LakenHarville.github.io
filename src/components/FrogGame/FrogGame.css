@@ -101,7 +101,7 @@
 }
 
 .instructions-intro {
-  color: #b8c4cf;
+  color: #e6edf3;
   font-size: 0.95rem;
   margin-bottom: 28px;
 }
@@ -176,7 +176,7 @@ kbd.key-wide {
 
 .feature-item {
   font-size: 0.85rem;
-  color: #b8c4cf;
+  color: #e6edf3;
   line-height: 1.5;
 }
 
@@ -283,7 +283,7 @@ kbd.key-wide {
   align-items: center;
   gap: 8px;
   font-size: 0.8rem;
-  color: #b8c4cf;
+  color: #e6edf3;
 }
 
 .legend-dot {

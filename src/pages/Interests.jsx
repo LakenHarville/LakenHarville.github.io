@@ -17,7 +17,7 @@ function Interests() {
       title: 'Vehicular Technology',
       icon: '🚗',
       description:
-        'I\'m fascinated by the ingenuity of transportation design. This interest spans from the outer design to the genius engineering that makes cars, trucks, and motorcycles run.',
+        'I\'m fascinated by the ingenuity of transportation design. This interest spans from the outer design to the genius engineering that makes cars, trucks, and motorcycles run. When I was younger, I used to obsess with the idea of becoming a race car driver.',
       tags: ['Muscle Cars', 'Imports', 'Trucks', 'Motorcycles'],
     },
     {
@@ -31,28 +31,28 @@ function Interests() {
       title: 'Game Development/Gaming',
       icon: '🎮',
       description:
-        'Games blend art and engineering in a way that has always fascinated me. My addiction started in the late 90s with my Dad\'s Nintendo 64 and the rest was history. Perhaps I\'ll make my own games one day.',
+        'Games blend art and engineering in a way that has always fascinated me. My addiction started in the late 90s with my Dad\'s Nintendo 64 and the rest was history. You\'ll find me playing adventure and RPG games in my free time.',
       tags: ['Unity', 'Story-Telling', 'Game Design', 'Engineering Technologies'],
     },
     {
       title: 'Space Technology',
       icon: '🛰️',
       description:
-        'The software powering rockets, satellites, and spacecraft represents some of the most demanding engineering on (and off) Earth. From flight control systems to orbital mechanics simulations to the embedded firmware keeping satellites online, space tech pushes software to its limits — and I find that incredibly inspiring.',
+        'The software powering rockets, satellites, and spacecraft represents some of the most demanding engineering on (and off) Earth. From flight control systems to orbital mechanics simulations to the embedded firmware keeping satellites online, space tech pushes software to its limits and I find that incredibly inspiring.',
       tags: ['Rocket Software', 'Satellites', 'Flight Systems', 'Embedded Software'],
     },
     {
       title: 'Tech Innovation',
       icon: '🚀',
       description:
-        'I\'m always keeping an eye on emerging technologies — from new frameworks and tools to breakthroughs in computing. The pace of innovation inspires me to keep learning and building.',
+        'I\'m always keeping an eye on emerging technologies. I am fascinated by cellular technologies that connect the world, website designs that push beyond what I think is possible, and I always keep up with the integration of AI and human interaction such as web tools and autonomous machines. ',
       tags: ['Emerging Tech', 'Web Standards', 'Performance'],
     },
     {
       title: 'Nature & Animals',
       icon: '🌿',
       description:
-        'When I\'m not behind a screen, I love being outdoors and observing the natural world. There\'s something grounding about watching wildlife go about their day — it reminds me that the best designs in the universe weren\'t written in code. My appreciation for nature influences my creative work, including the rainforest theme of this portfolio.',
+        'I have always had a deep appreciation for the natural world. Growing up, I spent a considerable amount of time watching Animal Planet, specifically The Crocodile Hunter, and National Geographic. If I\'m not inside coding or gaming, then you will certainly find me running or biking outside on a sunny day.',
       tags: ['Wildlife', 'Hiking', 'Biodiversity', 'Outdoors'],
     },
   ]
