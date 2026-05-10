@@ -23,25 +23,55 @@ import * as THREE from 'three'
  */
 
 // =============================================
-// GLOWING MUSHROOM — Color changer
+// GLOWING MUSHROOM — Eaten by frog's tongue (F key)
 // =============================================
-export function GlowingMushroom({ position, color, glowColor }) {
+/**
+ * The mushroom now has a visibility state passed from the parent.
+ * When eaten, the mushroom fades out over ~0.3s (scale shrinks + opacity drops)
+ * and the geometry stops rendering. When it respawns, it fades back in.
+ * 
+ * STATE SOURCE OF TRUTH: GameScene owns a `Set` of eaten indices.
+ * Parent-child data flow: Set → InteractiveObjects → individual Mushroom.
+ * 
+ * Why a Set instead of an array of booleans? Set.has() is O(1) lookup,
+ * and adding/removing items is also O(1). For a small number of mushrooms
+ * (~7) it doesn't matter much, but it's a habit worth having.
+ */
+export function GlowingMushroom({ position, color, glowColor, isEaten }) {
   const capRef = useRef()
   const lightRef = useRef()
+  const groupRef = useRef()
+  const visibilityRef = useRef(1) // 1 = fully visible, 0 = fully hidden
 
-  useFrame((state) => {
+  useFrame((state, delta) => {
     const time = state.clock.elapsedTime
-    // Pulse glow intensity
-    if (capRef.current) {
+    
+    // Fade in/out based on eaten state
+    const targetVisibility = isEaten ? 0 : 1
+    visibilityRef.current = THREE.MathUtils.lerp(
+      visibilityRef.current, 
+      targetVisibility, 
+      0.12  // ~0.3 second fade
+    )
+
+    // Apply visibility as scale (more dramatic than opacity alone)
+    if (groupRef.current) {
+      const v = visibilityRef.current
+      groupRef.current.scale.setScalar(Math.max(0.001, v))
+      groupRef.current.visible = v > 0.01
+    }
+
+    // Pulse glow only when visible
+    if (capRef.current && visibilityRef.current > 0.5) {
       capRef.current.material.emissiveIntensity = 0.6 + Math.sin(time * 2 + position[0]) * 0.4
     }
     if (lightRef.current) {
-      lightRef.current.intensity = 1.5 + Math.sin(time * 2 + position[0]) * 0.5
+      lightRef.current.intensity = (1.5 + Math.sin(time * 2 + position[0]) * 0.5) * visibilityRef.current
     }
   })
 
   return (
-    <group position={position}>
+    <group ref={groupRef} position={position}>
       {/* Stem */}
       <mesh position={[0, 0.25, 0]} castShadow>
         <cylinderGeometry args={[0.06, 0.1, 0.5, 8]} />
@@ -425,8 +455,13 @@ export function MossyLogBridge({ position, rotation = 0, length = 5 }) {
  * Places all interactive objects in the world based on configuration 
  * data. This keeps the GameScene clean — it just renders this component 
  * and passes the config data. Separation of concerns at its finest.
+ * 
+ * `eatenMushrooms` is a Set of mushroom indices that are currently 
+ * eaten (hidden). It's recreated by GameScene each time a mushroom 
+ * is eaten or respawned, which causes this component to re-render 
+ * just enough to show/hide the right mushrooms.
  */
-export default function InteractiveObjects({ config }) {
+export default function InteractiveObjects({ config, eatenMushrooms }) {
   return (
     <group>
       {/* Glowing Mushrooms */}
@@ -436,6 +471,7 @@ export default function InteractiveObjects({ config }) {
           position={m.position}
           color={m.color}
           glowColor={m.glowColor}
+          isEaten={eatenMushrooms?.has(i) || false}
         />
       ))}
 

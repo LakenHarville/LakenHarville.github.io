@@ -74,12 +74,17 @@ function FrogGame() {
                 </div>
                 <div className="control-item">
                   <kbd className="key-wide">Space</kbd>
-                  <span>Big Hop & Interact</span>
+                  <span>Big Hop & Activate Lily Pads</span>
+                </div>
+                <div className="control-item">
+                  <kbd className="key-wide">F</kbd>
+                  <span>Lick & Eat Mushrooms</span>
                 </div>
               </div>
 
               <div className="instructions-features">
-                <div className="feature-item">🍄 Touch mushrooms to change color</div>
+                <div className="feature-item">🍄 Eat mushrooms with <kbd>F</kbd> to change color</div>
+                <div className="feature-item">🐞 Bugs wander around — they'll flee if you get close</div>
                 <div className="feature-item">🌿 Disturb reeds to find secrets</div>
                 <div className="feature-item">💧 Hop near puddles to see creatures</div>
                 <div className="feature-item">🌺 Find the lily pad portals to explore</div>
@@ -142,7 +147,8 @@ function FrogGame() {
         {!showInstructions && (
           <div className="controls-reminder">
             <span><kbd>WASD</kbd> Move</span>
-            <span><kbd>Space</kbd> Interact</span>
+            <span><kbd>Space</kbd> Hop/Activate</span>
+            <span><kbd>F</kbd> Lick</span>
           </div>
         )}
       </div>
@@ -159,6 +165,7 @@ function FrogGame() {
           <GameScene
             onElementActivate={handleElementActivate}
             onNearElement={handleNearElement}
+            onColorChange={handleColorChange}
             gameActive={!showInstructions}
           />
         </Suspense>

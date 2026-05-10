@@ -1,9 +1,10 @@
-import { useMemo } from 'react'
+import { useMemo, useState, useRef, useCallback } from 'react'
 import { Sky } from '@react-three/drei'
 import Frog from './Frog'
 import GameElement from './GameElement'
 import RainforestEnvironment from './RainforestEnvironment'
 import InteractiveObjects from './InteractiveObjects'
+import Bugs from './Bugs'
 
 /**
  * GameScene — The World Orchestrator
@@ -29,7 +30,47 @@ import InteractiveObjects from './InteractiveObjects'
  * Frog component would see "new" objects every frame and waste 
  * cycles rechecking identical data.
  */
-function GameScene({ onElementActivate, onNearElement, gameActive }) {
+function GameScene({ onElementActivate, onNearElement, onColorChange, gameActive }) {
+
+  // ======== MUSHROOM EATEN STATE ========
+  // A Set of mushroom indices currently eaten (hidden). When the frog 
+  // eats a mushroom, we add its index here, then schedule a respawn 
+  // after MUSHROOM_RESPAWN_TIME via setTimeout.
+  const [eatenMushrooms, setEatenMushrooms] = useState(new Set())
+  const MUSHROOM_RESPAWN_TIME = 6000  // 6 seconds
+
+  // ======== FROG POSITION REF ========
+  // Bugs need to know where the frog is to flee. Using state would 
+  // trigger 60 re-renders/sec — terrible. Instead, the Frog writes its 
+  // X/Z to this ref each frame, and Bugs read from it. Refs persist 
+  // across renders without causing re-renders.
+  const frogPosRef = useRef({ x: 0, z: 0 })
+
+  /**
+   * Handle frog eating a mushroom.
+   * 
+   * Why a NEW Set instead of mutating the existing one?
+   * React only re-renders when state REFERENCES change. If we did 
+   * `eatenMushrooms.add(idx); setEatenMushrooms(eatenMushrooms)`, React 
+   * would compare the same reference to itself and skip the re-render.
+   * Creating a new Set with `new Set(prev).add(idx)` guarantees a new 
+   * reference, so React knows to re-render.
+   */
+  const handleEatMushroom = useCallback((mushroomIdx) => {
+    setEatenMushrooms(prev => {
+      const next = new Set(prev)
+      next.add(mushroomIdx)
+      return next
+    })
+    // Respawn after delay
+    setTimeout(() => {
+      setEatenMushrooms(prev => {
+        const next = new Set(prev)
+        next.delete(mushroomIdx)
+        return next
+      })
+    }, MUSHROOM_RESPAWN_TIME)
+  }, [])
 
   // ======== PORTAL ELEMENTS (Lily Pads) ========
   // Scattered through the rainforest at key clearings
@@ -240,7 +281,10 @@ function GameScene({ onElementActivate, onNearElement, gameActive }) {
 
       {/* ======== THE WORLD ======== */}
       <RainforestEnvironment />
-      <InteractiveObjects config={interactiveConfig} />
+      <InteractiveObjects config={interactiveConfig} eatenMushrooms={eatenMushrooms} />
+
+      {/* ======== BUGS — wandering with flee AI ======== */}
+      <Bugs frogPosRef={frogPosRef} />
 
       {/* ======== PORTAL ELEMENTS (Lily Pads) ======== */}
       {elements.map((el) => (
@@ -256,8 +300,12 @@ function GameScene({ onElementActivate, onNearElement, gameActive }) {
       <Frog
         elements={elements}
         interactiveObjects={interactiveConfig}
+        eatenMushrooms={eatenMushrooms}
         onElementActivate={onElementActivate}
         onNearElement={onNearElement}
+        onColorChange={onColorChange}
+        onEatMushroom={handleEatMushroom}
+        frogPosRef={frogPosRef}
         gameActive={gameActive}
       />
     </>

@@ -31,12 +31,13 @@ import { audioAPI } from '../../hooks/useAudioManager'
 
 const _tempVec3 = new THREE.Vector3()
 
-function Frog({ elements, interactiveObjects, onElementActivate, onNearElement, onColorChange, gameActive }) {
+function Frog({ elements, interactiveObjects, eatenMushrooms, onElementActivate, onNearElement, onColorChange, onEatMushroom, frogPosRef, gameActive }) {
   const groupRef = useRef()
   const bodyRef = useRef()
   const throatRef = useRef()
   const leftEyeRef = useRef()
   const rightEyeRef = useRef()
+  const tongueRef = useRef()
   const { camera } = useThree()
 
   // Movement
@@ -64,6 +65,24 @@ function Frog({ elements, interactiveObjects, onElementActivate, onNearElement, 
   const bellyColor = useRef(new THREE.Color('#7aef9a'))
   const targetBellyRef = useRef(new THREE.Color('#7aef9a'))
 
+  // Body materials. R3F's inline `color={threeColor}` COPIES the value into
+  // a fresh THREE.Color on the material, so mutating currentColor.current at
+  // 60fps never reached the GPU. Pre-build the materials here and reassign
+  // their `.color` to the shared refs so a single lerp recolors every part.
+  const frogMaterials = useMemo(() => {
+    const body = new THREE.MeshStandardMaterial({ roughness: 0.55, metalness: 0.05 })
+    const dorsal = new THREE.MeshStandardMaterial({ roughness: 0.5 })
+    const eyeSocket = new THREE.MeshStandardMaterial({ roughness: 0.5 })
+    const leg = new THREE.MeshStandardMaterial({ roughness: 0.6 })
+    const belly = new THREE.MeshStandardMaterial({ roughness: 0.65, transparent: true, opacity: 0.95 })
+    body.color = currentColor.current
+    dorsal.color = currentColor.current
+    eyeSocket.color = currentColor.current
+    leg.color = currentColor.current
+    belly.color = bellyColor.current
+    return { body, dorsal, eyeSocket, leg, belly }
+  }, [])
+
   // Proximity
   const nearestElement = useRef(null)
 
@@ -71,6 +90,16 @@ function Frog({ elements, interactiveObjects, onElementActivate, onNearElement, 
   const isBouncing = useRef(false)
   const bounceProgress = useRef(0)
   const bounceHeight = useRef(0)
+
+  // ---- Tongue state machine ----
+  // Three phases: IDLE → EXTENDING → RETRACTING → IDLE
+  // We track the target mushroom locked in at "shoot" time so the tongue 
+  // doesn't bend mid-extension if another mushroom is closer.
+  const isTonguing = useRef(false)
+  const tonguePhase = useRef('idle') // 'extending' | 'retracting'
+  const tongueProgress = useRef(0)
+  const tongueTarget = useRef({ x: 0, z: 0, mushroomIdx: -1 })
+  const lastTongueTime = useRef(0)
 
   // Camera — uses DOUBLE SMOOTHING to eliminate motion sickness.
   // 
@@ -98,6 +127,11 @@ function Frog({ elements, interactiveObjects, onElementActivate, onNearElement, 
   const INTERACT_DISTANCE = 3.5
   const CROAK_INTERVAL = 15
   const CROAK_DURATION = 1.2
+  
+  // Tongue tunables
+  const TONGUE_RANGE = 3.0          // Max distance the tongue can reach
+  const TONGUE_DURATION = 0.3       // Total animation time (extend + retract)
+  const TONGUE_COOLDOWN = 0.4       // Min time between tongue uses
 
   // Keyboard
   const handleKeyDown = (e) => {
@@ -143,7 +177,6 @@ function Frog({ elements, interactiveObjects, onElementActivate, onNearElement, 
       isCroaking.current = true
       croakProgress.current = 0
       lastCroakTime.current = time
-      // Play the croak sound effect (requires /public/music/croak.mp3)
       audioAPI.playSFX('croak')
     }
     if (isCroaking.current) {
@@ -262,6 +295,43 @@ function Frog({ elements, interactiveObjects, onElementActivate, onNearElement, 
       rightEyeRef.current.scale.y = THREE.MathUtils.lerp(rightEyeRef.current.scale.y, target, 0.3)
     }
 
+    // ---- Tongue mesh animation ----
+    // The tongue is a cylinder positioned at the mouth and rotated to point 
+    // at its target. Its length scales smoothly during extend/retract.
+    // 
+    // Visual trick: the tongue's parent group must move forward by half the 
+    // tongue's length so the BACK end stays planted at the mouth while the 
+    // FRONT end reaches toward the target. Without this offset, the tongue 
+    // would scale outward in both directions like a magic wand.
+    if (tongueRef.current) {
+      if (isTonguing.current) {
+        // World-space distance from frog to target
+        const tdx = tongueTarget.current.x - pos.x
+        const tdz = tongueTarget.current.z - pos.z
+        const targetDist = Math.min(TONGUE_RANGE, Math.sqrt(tdx * tdx + tdz * tdz))
+
+        // Smooth ease-in-out — sin gives natural acceleration/deceleration
+        const t = tonguePhase.current === 'extending'
+          ? tongueProgress.current
+          : 1 - tongueProgress.current
+        const eased = Math.sin(t * Math.PI / 2)
+        const currentLength = targetDist * eased
+
+        // Tongue always shoots straight forward out of the mouth.
+        // The frog snap-rotates to face its target when F is pressed (see
+        // F-key handler below), so "forward" is also "toward the target".
+        tongueRef.current.visible = true
+        tongueRef.current.rotation.y = 0
+        tongueRef.current.scale.z = Math.max(0.001, currentLength * 5)
+        const halfLen = currentLength / 2
+        tongueRef.current.position.x = 0
+        tongueRef.current.position.y = 0.35
+        tongueRef.current.position.z = 0.5 + halfLen
+      } else {
+        tongueRef.current.visible = false
+      }
+    }
+
     // ---- Color lerp ----
     currentColor.current.lerp(targetColorRef.current, 0.05)
     bellyColor.current.lerp(targetBellyRef.current, 0.05)
@@ -279,16 +349,80 @@ function Frog({ elements, interactiveObjects, onElementActivate, onNearElement, 
       onNearElement(nearest)
     }
 
-    // ---- Mushroom color check ----
-    if (interactiveObjects?.mushrooms) {
-      for (const m of interactiveObjects.mushrooms) {
-        const dx = pos.x - m.position[0]
-        const dz = pos.z - m.position[2]
-        if (Math.sqrt(dx * dx + dz * dz) < 1.5) {
-          targetColorRef.current.set(m.frogColor)
-          targetBellyRef.current.set(m.frogBellyColor)
-          if (onColorChange) onColorChange(m.frogColor)
-          break
+    // ---- Write frog position for bugs to read (no re-render needed) ----
+    if (frogPosRef) {
+      frogPosRef.current.x = pos.x
+      frogPosRef.current.z = pos.z
+    }
+
+    // ---- TONGUE MECHANIC (F key) ----
+    // Process F key only when idle (not already mid-tongue)
+    if (k['KeyF'] && !isTonguing.current && time - lastTongueTime.current > TONGUE_COOLDOWN) {
+      lastTongueTime.current = time
+      
+      // Find the nearest UN-EATEN mushroom within tongue range
+      let bestIdx = -1
+      let bestDist = TONGUE_RANGE
+      let bestMushroom = null
+      if (interactiveObjects?.mushrooms) {
+        for (let i = 0; i < interactiveObjects.mushrooms.length; i++) {
+          // Skip mushrooms that are currently eaten/respawning
+          if (eatenMushrooms?.has(i)) continue
+          const m = interactiveObjects.mushrooms[i]
+          const dx = m.position[0] - pos.x
+          const dz = m.position[2] - pos.z
+          const dist = Math.sqrt(dx * dx + dz * dz)
+          if (dist < bestDist) {
+            bestDist = dist
+            bestIdx = i
+            bestMushroom = m
+          }
+        }
+      }
+
+      // Lock in the tongue's destination at "shoot" time
+      if (bestMushroom) {
+        // Snap the frog to face the mushroom so the tongue always shoots
+        // straight out of the mouth, regardless of which way the frog was facing.
+        const aimDx = bestMushroom.position[0] - pos.x
+        const aimDz = bestMushroom.position[2] - pos.z
+        const aimAngle = Math.atan2(aimDx, aimDz)
+        groupRef.current.rotation.y = aimAngle
+        targetRotation.current = aimAngle
+
+        tongueTarget.current.x = bestMushroom.position[0]
+        tongueTarget.current.z = bestMushroom.position[2]
+        tongueTarget.current.mushroomIdx = bestIdx
+        // Eat it! Frog turns the mushroom's color (body + belly).
+        targetColorRef.current.set(bestMushroom.color)
+        targetBellyRef.current.set(bestMushroom.color)
+        if (onColorChange) onColorChange(bestMushroom.color)
+        if (onEatMushroom) onEatMushroom(bestIdx)
+        audioAPI.playSFX('munch')
+      } else {
+        // No target — tongue extends straight forward at half-range, just for show
+        const forwardX = pos.x + Math.sin(targetRotation.current) * (TONGUE_RANGE * 0.5)
+        const forwardZ = pos.z + Math.cos(targetRotation.current) * (TONGUE_RANGE * 0.5)
+        tongueTarget.current.x = forwardX
+        tongueTarget.current.z = forwardZ
+        tongueTarget.current.mushroomIdx = -1
+      }
+
+      isTonguing.current = true
+      tonguePhase.current = 'extending'
+      tongueProgress.current = 0
+    }
+
+    // Animate tongue
+    if (isTonguing.current) {
+      tongueProgress.current += delta / (TONGUE_DURATION / 2)
+      if (tongueProgress.current >= 1) {
+        tongueProgress.current = 0
+        if (tonguePhase.current === 'extending') {
+          tonguePhase.current = 'retracting'
+        } else {
+          isTonguing.current = false
+          tonguePhase.current = 'idle'
         }
       }
     }
@@ -341,15 +475,13 @@ function Frog({ elements, interactiveObjects, onElementActivate, onNearElement, 
     <group ref={groupRef} position={[0, 0, 5]}>
       <group ref={bodyRef}>
         {/* Main body */}
-        <mesh position={[0, 0.38, 0]} castShadow>
+        <mesh position={[0, 0.38, 0]} castShadow material={frogMaterials.body}>
           <sphereGeometry args={[0.52, 24, 18]} />
-          <meshStandardMaterial color={currentColor.current} roughness={0.55} metalness={0.05} />
         </mesh>
 
         {/* Dorsal ridge */}
-        <mesh position={[0, 0.55, -0.12]} castShadow>
+        <mesh position={[0, 0.55, -0.12]} castShadow material={frogMaterials.dorsal}>
           <sphereGeometry args={[0.38, 20, 14]} />
-          <meshStandardMaterial color={currentColor.current} roughness={0.5} />
         </mesh>
 
         {/* Back spots */}
@@ -361,9 +493,8 @@ function Frog({ elements, interactiveObjects, onElementActivate, onNearElement, 
         ))}
 
         {/* Belly */}
-        <mesh position={[0, 0.25, 0.12]} castShadow>
+        <mesh position={[0, 0.25, 0.12]} castShadow material={frogMaterials.belly}>
           <sphereGeometry args={[0.42, 20, 14]} />
-          <meshStandardMaterial color={bellyColor.current} roughness={0.65} transparent opacity={0.95} />
         </mesh>
 
         {/* Throat pouch (croak animation) */}
@@ -374,9 +505,8 @@ function Frog({ elements, interactiveObjects, onElementActivate, onNearElement, 
 
         {/* ===== LEFT EYE ===== */}
         <group position={[-0.24, 0.72, 0.18]}>
-          <mesh castShadow>
+          <mesh castShadow material={frogMaterials.eyeSocket}>
             <sphereGeometry args={[0.2, 16, 12]} />
-            <meshStandardMaterial color={currentColor.current} roughness={0.5} />
           </mesh>
           <group ref={leftEyeRef}>
             <mesh position={[0, 0.04, 0.1]}>
@@ -400,9 +530,8 @@ function Frog({ elements, interactiveObjects, onElementActivate, onNearElement, 
 
         {/* ===== RIGHT EYE ===== */}
         <group position={[0.24, 0.72, 0.18]}>
-          <mesh castShadow>
+          <mesh castShadow material={frogMaterials.eyeSocket}>
             <sphereGeometry args={[0.2, 16, 12]} />
-            <meshStandardMaterial color={currentColor.current} roughness={0.5} />
           </mesh>
           <group ref={rightEyeRef}>
             <mesh position={[0, 0.04, 0.1]}>
@@ -440,17 +569,39 @@ function Frog({ elements, interactiveObjects, onElementActivate, onNearElement, 
           <meshStandardMaterial color="#0a5a2a" />
         </mesh>
 
+        {/* ===== TONGUE =====
+            Architecture: a parent <group> handles aiming (rotation.y) and 
+            length scaling (scale.z). Inside, a cylinder rotated 90° around X 
+            lays along the Z axis with its base AT the origin (we shift it 
+            forward by half its native length). Then when the parent group 
+            scales on Z, the tongue elongates from the mouth outward.
+            
+            Base geometry length = 0.2 (along Z after rotation).
+            scale.z = currentLength / 0.2 stretches it to the target distance.
+            position.x/z on the parent group offsets the visual midpoint forward.
+        */}
+        <group ref={tongueRef} position={[0, 0.35, 0.5]} visible={false}>
+          <mesh rotation={[Math.PI / 2, 0, 0]}>
+            <cylinderGeometry args={[0.04, 0.05, 0.2, 8]} />
+            <meshStandardMaterial
+              color="#ff6b8a"
+              roughness={0.6}
+              metalness={0.05}
+              emissive="#ff3355"
+              emissiveIntensity={0.15}
+            />
+          </mesh>
+        </group>
+
         {/* ===== FRONT LEGS with webbed toes ===== */}
         {[[-1, -0.5], [1, 0.5]].map(([side, rotZ], li) => (
           <group key={`fleg-${li}`} position={[0.38 * side, 0.15, 0.2]} rotation={[0.4, 0, rotZ]}>
-            <mesh castShadow>
+            <mesh castShadow material={frogMaterials.leg}>
               <capsuleGeometry args={[0.06, 0.2, 6, 10]} />
-              <meshStandardMaterial color={currentColor.current} roughness={0.6} />
             </mesh>
             <group position={[0, -0.18, 0.05]}>
-              <mesh castShadow>
+              <mesh castShadow material={frogMaterials.leg}>
                 <sphereGeometry args={[0.07, 10, 8]} />
-                <meshStandardMaterial color={currentColor.current} roughness={0.6} />
               </mesh>
               {[-0.06, 0, 0.06].map((tx, i) => (
                 <mesh key={i} position={[tx, -0.02, 0.06]} rotation={[0.3, 0, (i - 1) * 0.3]} castShadow>
@@ -465,18 +616,15 @@ function Frog({ elements, interactiveObjects, onElementActivate, onNearElement, 
         {/* ===== BACK LEGS (larger, folded Z-shape) ===== */}
         {[-1, 1].map((side, li) => (
           <group key={`bleg-${li}`} position={[0.35 * side, 0.18, -0.2]}>
-            <mesh position={[0.12 * side, 0, 0]} rotation={[0, 0, -0.8 * side]} castShadow>
+            <mesh position={[0.12 * side, 0, 0]} rotation={[0, 0, -0.8 * side]} castShadow material={frogMaterials.leg}>
               <capsuleGeometry args={[0.09, 0.25, 6, 10]} />
-              <meshStandardMaterial color={currentColor.current} roughness={0.6} />
             </mesh>
-            <mesh position={[0.28 * side, -0.08, 0.05]} rotation={[0.3, 0, 0.6 * side]} castShadow>
+            <mesh position={[0.28 * side, -0.08, 0.05]} rotation={[0.3, 0, 0.6 * side]} castShadow material={frogMaterials.leg}>
               <capsuleGeometry args={[0.065, 0.22, 6, 10]} />
-              <meshStandardMaterial color={currentColor.current} roughness={0.6} />
             </mesh>
             <group position={[0.32 * side, -0.1, 0.15]}>
-              <mesh castShadow>
+              <mesh castShadow material={frogMaterials.leg}>
                 <sphereGeometry args={[0.08, 10, 8]} />
-                <meshStandardMaterial color={currentColor.current} roughness={0.6} />
               </mesh>
               {[-0.07, -0.02, 0.04, 0.09].map((tx, i) => (
                 <mesh key={i} position={[tx * side, -0.02, 0.06]} rotation={[0.3, 0, (i - 1.5) * 0.2 * side]} castShadow>
