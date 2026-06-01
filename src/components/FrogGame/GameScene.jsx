@@ -176,40 +176,42 @@ function GameScene({ onElementActivate, onNearElement, onColorChange, gameActive
      */
     reeds: [
       { position: [-3, 0, -3], secret: '🦎 A gecko watches silently...' },
-      { position: [8, 0, -8], secret: '✨ You found a golden beetle!' },
+      // moved from [8, -8] (near Resume) to [6, -7]
+      { position: [6, 0, -7], secret: '✨ You found a golden beetle!' },
       { position: [-10, 0, 6], secret: '🍄 Fungi network detected!' },
       { position: [6, 0, 14], secret: '🐍 A friendly snake says hi!' },
-      { position: [-7, 0, -16], secret: '🌺 Rare orchid discovered!' },
+      // moved from [-7, -16] (near Projects) to [-3, -15]
+      { position: [-3, 0, -15], secret: '🌺 Rare orchid discovered!' },
       { position: [16, 0, 6], secret: '🦋 A morpho butterfly!' },
-      { position: [-15, 0, -10], secret: '🪲 Stag beetle territory!' },
+      // moved from [-15, -10] (3.6u from Education portal) to [-17, -11]
+      { position: [-17, 0, -11], secret: '🪲 Stag beetle territory!' },
       { position: [2, 0, -13], secret: '🌿 Ancient fern spores!' },
     ],
 
     /**
      * PUDDLES with creatures
      * Shallow water pools that show tadpoles and insects.
+     * Trimmed from 7 → 4 for performance.
      */
     puddles: [
       { position: [2, 0, 3], creature: '🐛' },
-      { position: [-6, 0, -8], creature: '🦟' },
-      { position: [10, 0, 8], creature: '🐛' },
       { position: [-12, 0, 2], creature: '🐸' }, // Tadpoles!
       { position: [4, 0, -15], creature: '🦟' },
-      { position: [-2, 0, 16], creature: '🐛' },
       { position: [14, 0, -14], creature: '🐸' },
     ],
 
     /**
      * MOSSY LOG BRIDGES
-     * Spanning the river at key crossing points.
-     * The river winds from top-left to bottom-right,
-     * so logs are angled perpendicular to the flow.
+     * Spanning the river at key crossing points. Positions are tweaked so
+     * none of them sit on top of a portal lily pad clearing.
      */
     logs: [
-      { position: [-10, 0, -8], rotation: 0.5, length: 5 },
+      // moved from [-10, -8] (on Education portal) to [-8, -4]
+      { position: [-8, 0, -4], rotation: 0.5, length: 5 },
       { position: [-2, 0, 2], rotation: -0.1, length: 4.5 },
       { position: [6, 0, 10], rotation: -0.3, length: 5 },
-      { position: [13, 0, 15], rotation: -0.2, length: 4 },
+      // moved from [13, 15] (close to Interests portal) to [11, 17]
+      { position: [11, 0, 17], rotation: -0.2, length: 4 },
     ],
   }), [])
 

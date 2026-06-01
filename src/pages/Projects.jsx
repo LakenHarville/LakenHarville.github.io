@@ -66,7 +66,7 @@ function Projects() {
         'A multi-page fitness website ("Fit You with Fit Cost") that helps users compare gym costs vs home workouts, track healthy habits, and calculate potential savings. Built with Bootstrap 5 for a fully responsive experience across devices.',
       tech: ['HTML5', 'CSS3', 'JavaScript', 'Bootstrap 5'],
       github: '#',
-      live: null,
+      live: 'https://stu.westga.edu/~rharvil1/LakenHarvilleFinalProject/calculator.html',
       status: 'complete',
       featured: false,
     },

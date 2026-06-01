@@ -23,7 +23,7 @@ function Education() {
       institution: 'University of West Georgia',
       degree: 'Master of Science in Applied Computer Science',
       period: '2024 - 2026',
-      gpa: '3.55',
+      gpa: '3.66',
       icon: '🎓',
       highlights: [
         'Gathered and analyzed requirements for multiple projects, translating complex needs into clear technical specifications',

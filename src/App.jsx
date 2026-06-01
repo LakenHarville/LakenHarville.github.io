@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, useLocation } from 'react-router-dom'
 import Navbar from './components/Navbar'
 import MusicController from './components/MusicController'
 import Home from './pages/Home'
@@ -23,18 +23,28 @@ import './App.css'
  * and crossfades music between site pages and the game.
  */
 function App() {
+  // Skip the animated background on the frog game route — the 3D scene has
+  // its own atmosphere and the orbs would compete with it.
+  const location = useLocation()
+  const showBgEffects = location.pathname !== '/game'
+
   return (
     <div className="app">
-      {/* 
+      {/*
         Background effects layer — sits behind all content.
-        These create the ambient gradient orbs you see floating 
-        in the background. Pure CSS, zero performance cost.
+        Five blurred orbs drift on multi-stage paths with subtle rotation
+        and scaling. mix-blend-mode: screen makes their overlaps glow
+        additively, selling the "slow flame" feel.
       */}
-      <div className="bg-effects">
-        <div className="bg-orb bg-orb-1"></div>
-        <div className="bg-orb bg-orb-2"></div>
-        <div className="bg-orb bg-orb-3"></div>
-      </div>
+      {showBgEffects && (
+        <div className="bg-effects">
+          <div className="bg-orb bg-orb-1"></div>
+          <div className="bg-orb bg-orb-2"></div>
+          <div className="bg-orb bg-orb-3"></div>
+          <div className="bg-orb bg-orb-4"></div>
+          <div className="bg-orb bg-orb-5"></div>
+        </div>
+      )}
 
       <Navbar />
       <MusicController />

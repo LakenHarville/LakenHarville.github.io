@@ -32,9 +32,13 @@
 /* ---- Back Button ---- */
 
 .hud-back-btn {
-  position: absolute;
+  /* Fixed + high z-index so the R3F canvas (which makes its own stacking
+     context and grabs pointer events for raycasting) cannot eat clicks
+     on this button. */
+  position: fixed;
   top: 20px;
   left: 20px;
+  z-index: 1100;
   pointer-events: auto;
   padding: 10px 20px;
   background: rgba(3, 8, 6, 0.85);

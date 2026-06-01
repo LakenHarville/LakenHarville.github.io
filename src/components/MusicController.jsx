@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import { useAudioManager } from '../hooks/useAudioManager'
 import './MusicController.css'
@@ -30,12 +30,37 @@ function MusicController() {
   const [isMuted, setIsMuted] = useState(false)
   const [hasInteracted, setHasInteracted] = useState(false)
 
-  // ---- Detect first user interaction to unlock audio ----
+  // Refs that the global unlock handler reads — using refs (not state) lets
+  // the handler see the LATEST values without us having to re-bind it every
+  // render. Critical because the handler must call .play() synchronously
+  // inside the click/keydown event to preserve the user-gesture context
+  // that browsers require for audio.
+  const isMutedRef = useRef(isMuted)
+  const pathnameRef = useRef(location.pathname)
+  isMutedRef.current = isMuted
+  pathnameRef.current = location.pathname
+
+  // ---- First user interaction: start music synchronously ----
   useEffect(() => {
     const unlock = () => {
-      setHasInteracted(true)
+      // Strip listeners first so we never re-enter this handler.
       window.removeEventListener('click', unlock)
       window.removeEventListener('keydown', unlock)
+
+      console.log('[audio] first user gesture detected, route=', pathnameRef.current, 'muted=', isMutedRef.current)
+      if (!isMutedRef.current) {
+        // IMPORTANT: call audio.play* synchronously here. Going through a
+        // setState → re-render → effect path delays the play() call past the
+        // event-loop tick the gesture lives in, and some browsers (Safari,
+        // older Chrome) treat the gesture as expired and silently refuse.
+        if (pathnameRef.current === '/game') {
+          audio.playGameMusic(0.35)
+          audio.startForestAmbience(0.18)
+        } else {
+          audio.playSiteMusic(0.25)
+        }
+      }
+      setHasInteracted(true)
     }
     window.addEventListener('click', unlock)
     window.addEventListener('keydown', unlock)
@@ -43,17 +68,19 @@ function MusicController() {
       window.removeEventListener('click', unlock)
       window.removeEventListener('keydown', unlock)
     }
-  }, [])
+  }, [audio])
 
-  // ---- Switch music when route changes ----
+  // ---- Switch music when route changes (after first interaction) ----
   useEffect(() => {
     if (!hasInteracted || isMuted) return
 
     const isGamePage = location.pathname === '/game'
     if (isGamePage) {
       audio.playGameMusic(0.35)
+      audio.startForestAmbience(0.18)
     } else {
       audio.playSiteMusic(0.25)
+      audio.stopForestAmbience()
     }
   }, [location.pathname, hasInteracted, isMuted, audio])
 

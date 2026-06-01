@@ -5,27 +5,27 @@ import { audioAPI } from '../../hooks/useAudioManager'
 
 /**
  * Frog Component — Detailed Player Character (v2)
- * 
+ *
  * KEY CHANGES FROM v1:
- * 
- * 1. HOP-BASED MOVEMENT: Every WASD press triggers a small hop in that 
- *    direction. Real frogs don't slide — they leap spot to spot. We use 
- *    a state machine: IDLE → HOPPING → IDLE. During a hop, input is 
+ *
+ * 1. HOP-BASED MOVEMENT: Every WASD press triggers a small hop in that
+ *    direction. Real frogs don't slide — they leap spot to spot. We use
+ *    a state machine: IDLE → HOPPING → IDLE. During a hop, input is
  *    buffered. Think of a turn-based game at high speed.
- * 
- * 2. DETAILED MODEL: Smooth spheres replace boxy limbs. Prominent eyes 
- *    with orange irises and horizontal pupils (like real tree frogs). 
+ *
+ * 2. DETAILED MODEL: Smooth spheres replace boxy limbs. Prominent eyes
+ *    with orange irises and horizontal pupils (like real tree frogs).
  *    Webbed toes, back spots, and an inflatable throat pouch.
- * 
- * 3. CROAK SYSTEM: Every 15 seconds the throat pouch inflates with a 
+ *
+ * 3. CROAK SYSTEM: Every 15 seconds the throat pouch inflates with a
  *    double-pulse. Hook up Howler.js later for the actual sound.
- * 
- * 4. COLOR CHANGING: Glowing mushrooms set a target color, and the 
+ *
+ * 4. COLOR CHANGING: Glowing mushrooms set a target color, and the
  *    material lerps toward it each frame for a smooth transition.
- * 
+ *
  * WHY useRef FOR GAME STATE?
  * useState triggers React re-renders. At 60fps that's 60 re-renders/second.
- * useRef mutates a value silently — like writing on a whiteboard vs. 
+ * useRef mutates a value silently — like writing on a whiteboard vs.
  * sending a company-wide email every time you update a number.
  */
 
@@ -93,7 +93,7 @@ function Frog({ elements, interactiveObjects, eatenMushrooms, onElementActivate,
 
   // ---- Tongue state machine ----
   // Three phases: IDLE → EXTENDING → RETRACTING → IDLE
-  // We track the target mushroom locked in at "shoot" time so the tongue 
+  // We track the target mushroom locked in at "shoot" time so the tongue
   // doesn't bend mid-extension if another mushroom is closer.
   const isTonguing = useRef(false)
   const tonguePhase = useRef('idle') // 'extending' | 'retracting'
@@ -102,15 +102,15 @@ function Frog({ elements, interactiveObjects, eatenMushrooms, onElementActivate,
   const lastTongueTime = useRef(0)
 
   // Camera — uses DOUBLE SMOOTHING to eliminate motion sickness.
-  // 
+  //
   // Instead of snapping the camera target on each hop landing,
-  // we lerp smoothCameraTarget toward the frog's ground position 
+  // we lerp smoothCameraTarget toward the frog's ground position
   // every single frame. Then the CAMERA lerps toward THAT target.
-  // 
-  // Analogy: Imagine the frog is a race car. smoothCameraTarget is 
-  // a drone following the car with a rubber band. The actual camera 
+  //
+  // Analogy: Imagine the frog is a race car. smoothCameraTarget is
+  // a drone following the car with a rubber band. The actual camera
   // is a helicopter following the drone with an even longer rubber band.
-  // The car can jerk and bounce, but by the time the motion reaches 
+  // The car can jerk and bounce, but by the time the motion reaches
   // the helicopter, it's buttery smooth.
   const smoothCameraTarget = useRef(new THREE.Vector3(0, 0, 5))
   const smoothLookTarget = useRef(new THREE.Vector3(0, 0, 5))
@@ -127,7 +127,7 @@ function Frog({ elements, interactiveObjects, eatenMushrooms, onElementActivate,
   const INTERACT_DISTANCE = 3.5
   const CROAK_INTERVAL = 15
   const CROAK_DURATION = 1.2
-  
+
   // Tongue tunables
   const TONGUE_RANGE = 3.0          // Max distance the tongue can reach
   const TONGUE_DURATION = 0.3       // Total animation time (extend + retract)
@@ -196,8 +196,8 @@ function Frog({ elements, interactiveObjects, eatenMushrooms, onElementActivate,
       }
       const bounceY = Math.sin(Math.PI * bounceProgress.current) * bounceHeight.current
       groupRef.current.position.set(pos.x, bounceY, pos.z)
-      // During bounce: camera barely reacts. It stays at its current 
-      // position and only gently adjusts its gaze upward. The player 
+      // During bounce: camera barely reacts. It stays at its current
+      // position and only gently adjusts its gaze upward. The player
       // sees the frog fly up while the "camera operator" stays grounded.
       smoothCameraTarget.current.lerp(_tempVec3.set(pos.x, 0, pos.z), 0.01)
       const ct = smoothCameraTarget.current
@@ -296,12 +296,12 @@ function Frog({ elements, interactiveObjects, eatenMushrooms, onElementActivate,
     }
 
     // ---- Tongue mesh animation ----
-    // The tongue is a cylinder positioned at the mouth and rotated to point 
+    // The tongue is a cylinder positioned at the mouth and rotated to point
     // at its target. Its length scales smoothly during extend/retract.
-    // 
-    // Visual trick: the tongue's parent group must move forward by half the 
-    // tongue's length so the BACK end stays planted at the mouth while the 
-    // FRONT end reaches toward the target. Without this offset, the tongue 
+    //
+    // Visual trick: the tongue's parent group must move forward by half the
+    // tongue's length so the BACK end stays planted at the mouth while the
+    // FRONT end reaches toward the target. Without this offset, the tongue
     // would scale outward in both directions like a magic wand.
     if (tongueRef.current) {
       if (isTonguing.current) {
@@ -359,7 +359,7 @@ function Frog({ elements, interactiveObjects, eatenMushrooms, onElementActivate,
     // Process F key only when idle (not already mid-tongue)
     if (k['KeyF'] && !isTonguing.current && time - lastTongueTime.current > TONGUE_COOLDOWN) {
       lastTongueTime.current = time
-      
+
       // Find the nearest UN-EATEN mushroom within tongue range
       let bestIdx = -1
       let bestDist = TONGUE_RANGE
@@ -428,22 +428,22 @@ function Frog({ elements, interactiveObjects, eatenMushrooms, onElementActivate,
     }
 
     // ---- Camera follow (DOUBLE SMOOTHING) ----
-    // 
-    // STEP 1: smoothCameraTarget lerps toward the frog's GROUND position 
-    // (X/Z only, Y is always 0) every frame. The 0.04 factor means it 
+    //
+    // STEP 1: smoothCameraTarget lerps toward the frog's GROUND position
+    // (X/Z only, Y is always 0) every frame. The 0.04 factor means it
     // follows at 4% per frame — lagging behind like a drone on a rubber band.
     // Even if the frog hops rapidly, this target moves in a gentle arc.
     //
-    // STEP 2: The actual camera lerps toward a position DERIVED from 
-    // smoothCameraTarget. Another 0.02 lerp on top. Two layers of 
+    // STEP 2: The actual camera lerps toward a position DERIVED from
+    // smoothCameraTarget. Another 0.02 lerp on top. Two layers of
     // smoothing = extremely stable.
     //
-    // STEP 3: lookAt target is also double-smoothed. camera.lookAt() 
+    // STEP 3: lookAt target is also double-smoothed. camera.lookAt()
     // is instantaneous, but because the POINT it looks at moves smoothly,
     // the camera pivots gently instead of snapping.
     //
-    // The Y component is ALWAYS fixed (14 for height). The camera never 
-    // reacts to the frog's hop arc or bounce height. This is the #1 
+    // The Y component is ALWAYS fixed (14 for height). The camera never
+    // reacts to the frog's hop arc or bounce height. This is the #1
     // thing that prevents motion sickness.
     if (!isBouncing.current) {
       // Step 1: Smooth the target toward frog's ground position
@@ -570,12 +570,12 @@ function Frog({ elements, interactiveObjects, eatenMushrooms, onElementActivate,
         </mesh>
 
         {/* ===== TONGUE =====
-            Architecture: a parent <group> handles aiming (rotation.y) and 
-            length scaling (scale.z). Inside, a cylinder rotated 90° around X 
-            lays along the Z axis with its base AT the origin (we shift it 
-            forward by half its native length). Then when the parent group 
+            Architecture: a parent <group> handles aiming (rotation.y) and
+            length scaling (scale.z). Inside, a cylinder rotated 90° around X
+            lays along the Z axis with its base AT the origin (we shift it
+            forward by half its native length). Then when the parent group
             scales on Z, the tongue elongates from the mouth outward.
-            
+
             Base geometry length = 0.2 (along Z after rotation).
             scale.z = currentLength / 0.2 stretches it to the target distance.
             position.x/z on the parent group offsets the visual midpoint forward.

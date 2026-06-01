@@ -84,7 +84,7 @@ function FrogGame() {
 
               <div className="instructions-features">
                 <div className="feature-item">🍄 Eat mushrooms with <kbd>F</kbd> to change color</div>
-                <div className="feature-item">🐞 Bugs wander around — they'll flee if you get close</div>
+                <div className="feature-item">🐞 Bugs wander around they'll flee if you get close</div>
                 <div className="feature-item">🌿 Disturb reeds to find secrets</div>
                 <div className="feature-item">💧 Hop near puddles to see creatures</div>
                 <div className="feature-item">🌺 Find the lily pad portals to explore</div>
