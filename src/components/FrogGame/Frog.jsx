@@ -1,7 +1,6 @@
 import { useRef, useMemo } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
-import { audioAPI } from '../../hooks/useAudioManager'
 
 /**
  * Frog Component — Detailed Player Character (v2)
@@ -172,12 +171,11 @@ function Frog({ elements, interactiveObjects, eatenMushrooms, onElementActivate,
     const k = keys.current
     const pos = position.current
 
-    // ---- Croak every 15s ----
+    // ---- Croak every 15s (visual throat pulse only — no SFX) ----
     if (time - lastCroakTime.current >= CROAK_INTERVAL && !isCroaking.current) {
       isCroaking.current = true
       croakProgress.current = 0
       lastCroakTime.current = time
-      audioAPI.playSFX('croak')
     }
     if (isCroaking.current) {
       croakProgress.current += delta / CROAK_DURATION
@@ -398,7 +396,6 @@ function Frog({ elements, interactiveObjects, eatenMushrooms, onElementActivate,
         targetBellyRef.current.set(bestMushroom.color)
         if (onColorChange) onColorChange(bestMushroom.color)
         if (onEatMushroom) onEatMushroom(bestIdx)
-        audioAPI.playSFX('munch')
       } else {
         // No target — tongue extends straight forward at half-range, just for show
         const forwardX = pos.x + Math.sin(targetRotation.current) * (TONGUE_RANGE * 0.5)

@@ -114,6 +114,3 @@ npm run build
 
 Output goes to `/dist`. Deploy to Vercel, Netlify, GitHub Pages, or any static host.
 
-## License
-
-This is your personal portfolio — use it however you like!

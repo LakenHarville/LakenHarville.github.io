@@ -9,7 +9,10 @@
   width: 100vw;
   height: 100vh;
   background: #4a7a5a;
-  z-index: 100;
+  /* Raised above the Navbar (z:1000). Without this, the fixed navbar
+     overlays the top strip of the game and intercepts clicks meant for
+     the in-game UI (notably the "Back to Home" button at top-left). */
+  z-index: 1500;
 }
 
 .game-canvas {
@@ -32,13 +35,13 @@
 /* ---- Back Button ---- */
 
 .hud-back-btn {
-  /* Fixed + high z-index so the R3F canvas (which makes its own stacking
-     context and grabs pointer events for raycasting) cannot eat clicks
-     on this button. */
+  /* Fixed-position anchor link rendered above the <Canvas>. The very high
+     z-index (9999) puts it above every other element in the document — the
+     game wrapper, the navbar, anything — so the click always reaches it. */
   position: fixed;
   top: 20px;
   left: 20px;
-  z-index: 1100;
+  z-index: 9999;
   pointer-events: auto;
   padding: 10px 20px;
   background: rgba(3, 8, 6, 0.85);
@@ -49,6 +52,8 @@
   font-family: 'DM Sans', sans-serif;
   font-size: 0.9rem;
   cursor: pointer;
+  text-decoration: none; /* it's now an <a>, kill the underline */
+  display: inline-block;
   transition: all 150ms ease;
 }
 

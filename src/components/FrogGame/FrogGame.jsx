@@ -1,6 +1,6 @@
 import { Suspense, useState, useCallback } from 'react'
 import { Canvas } from '@react-three/fiber'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Link } from 'react-router-dom'
 import GameScene from './GameScene'
 import './FrogGame.css'
 
@@ -46,11 +46,20 @@ function FrogGame() {
 
   return (
     <div className="frog-game-wrapper">
+      {/* Back link — rendered OUTSIDE .game-hud so its real <a href> isn't
+          blocked by any pointer-events: none from the HUD container. Uses
+          React Router's Link, so the browser sees a normal anchor tag and
+          the navigation actually happens. */}
+      <Link
+        to="/"
+        className="hud-back-btn"
+        onClick={() => console.log('[nav] back-to-home clicked')}
+      >
+        ← Back to Home
+      </Link>
+
       {/* ======== GAME HUD ======== */}
       <div className="game-hud">
-        <button className="hud-back-btn" onClick={() => navigate('/')}>
-          ← Back to Home
-        </button>
 
         {/* Instructions overlay */}
         {showInstructions && (
