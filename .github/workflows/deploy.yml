@@ -1,0 +1,89 @@
+# ============================================================
+# GitHub Actions — Build & Deploy Vite Site to GitHub Pages
+#
+# WHAT THIS DOES:
+# Every time you push to the `main` branch, GitHub spins up a 
+# fresh Linux machine, installs your dependencies, runs the Vite 
+# build, and publishes the resulting `dist/` folder to GitHub Pages.
+#
+# WHY THIS IS BETTER THAN PUSHING dist/ MANUALLY:
+# You no longer commit built files. You push only your SOURCE code.
+# GitHub does the `npm run build` step for you in the cloud. This 
+# means no more "did I rebuild and push dist?" mistakes — the thing 
+# that's been blocking you.
+#
+# THINK OF IT LIKE:
+# A robot assistant that watches your repo. Every time you save new 
+# source code (push), the robot rebuilds the whole site from scratch 
+# and hangs it on the wall (deploys it). You never touch the built 
+# files yourself.
+# ============================================================
+
+name: Deploy to GitHub Pages
+
+on:
+  # Run whenever you push to main
+  push:
+    branches: [main]
+  # Also allow manual triggering from the Actions tab
+  workflow_dispatch:
+
+# Permissions needed for the deploy step to publish to Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Only one deploy at a time; cancel older runs if a new push comes in
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      # 1. Grab a copy of your repo
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # 2. Install Node.js (same major version you develop with)
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      # 3. Install dependencies from package-lock.json
+      - name: Install dependencies
+        run: npm ci
+
+      # 4. Build the production bundle into dist/
+      - name: Build
+        run: npm run build
+
+      # 5. SPA ROUTING FIX:
+      # GitHub Pages serves real files for real paths. Since this is a 
+      # Single Page App with client-side routing (BrowserRouter), a direct 
+      # visit to /projects would 404. By copying index.html to 404.html, 
+      # GitHub serves your app for ANY unknown path, and React Router then 
+      # shows the correct page. Clean URLs, no broken links.
+      - name: Create 404.html for SPA routing
+        run: cp dist/index.html dist/404.html
+
+      # 6. Package the dist/ folder as a Pages artifact
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

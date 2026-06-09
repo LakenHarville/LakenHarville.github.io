@@ -1,3 +1,8 @@
 node_modules/
 .DS_Store
 *.log
+
+# dist/ is now built automatically by GitHub Actions on every push,
+# so we no longer commit it. Keeping built files out of the repo 
+# keeps it clean and avoids merge conflicts on generated code.
+dist/
