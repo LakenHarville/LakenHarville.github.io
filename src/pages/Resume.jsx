@@ -2,19 +2,28 @@ import './PageStyles.css'
 
 /**
  * Resume Page
- * 
+ *
  * Layout: A clean, professional page with sections for experience,
  * skills, and a download button. Uses CSS Grid for the skills section
  * to create a responsive multi-column layout.
- * 
+ *
  * DESIGN DECISION — Why not just embed a PDF?
  * An HTML resume is searchable, accessible (screen readers can read it),
  * responsive (adapts to screen size), and styleable (matches your brand).
- * A PDF is none of those things. You can still offer a PDF download link 
+ * A PDF is none of those things. You can still offer a PDF download link
  * for recruiters who want to print it — best of both worlds.
- * 
- * TODO: Replace all placeholder content with your real information.
  */
+
+// Replaces the space between a month name and a 4-digit year with a
+// non-breaking space ( ). Effect: "August 2023" stays glued together
+// on one line, but the string as a whole can still wrap at commas or
+// dashes. So a long date like "September 2021 – August 2023, December 2024
+// – May 2026" wraps at nice logical breakpoints instead of orphaning "2023"
+// on its own line.
+function fmtDate(str) {
+  return str.replace(/ (\d{4})/g, ' $1')
+}
+
 function Resume() {
   return (
     <div className="page-wrapper">
@@ -60,7 +69,7 @@ function Resume() {
                   <h3 className="timeline-title">Microsoft TEALS Volunteer Instructor (Technology Education And Literacy in Schools)</h3>
                   <p className="timeline-company">Paul Bryant High School</p>
                 </div>
-                <span className="timeline-date">August 2023 – May 2024</span>
+                <span className="timeline-date">{fmtDate('August 2023 – May 2024')}</span>
               </div>
               <ul className="timeline-details">
                 <li>Mentored students in Python and Java, guiding them through debugging, testing, and systematic problem-solving.</li>
@@ -75,7 +84,7 @@ function Resume() {
                   <h3 className="timeline-title">Account Merchandiser</h3>
                   <p className="timeline-company">Buffalo Rock</p>
                 </div>
-                <span className="timeline-date">August 2023 – November 2024</span>
+                <span className="timeline-date">{fmtDate('August 2023 – November 2024')}</span>
               </div>
               <ul className="timeline-details">
                 <li>Responsible for the stock management and merchandising of products accross multiple bulk stores.</li>
@@ -89,7 +98,7 @@ function Resume() {
                   <h3 className="timeline-title">Deli Clerk</h3>
                   <p className="timeline-company">Publix Supermarkets</p>
                 </div>
-                <span className="timeline-date">September 2021 – August 2023, December 2024 - May 2026</span>
+                <span className="timeline-date">{fmtDate('September 2021 – August 2023, December 2024 – May 2026')}</span>
               </div>
               <ul className="timeline-details">
                 <li>Provided excellent customer service while driving sales.</li>
@@ -104,7 +113,7 @@ function Resume() {
                   <h3 className="timeline-title">Department Supervisor / Warehouse Associate</h3>
                   <p className="timeline-company">The Home Depot</p>
                 </div>
-                <span className="timeline-date">March 2017 – July 2021</span>
+                <span className="timeline-date">{fmtDate('March 2017 – July 2021')}</span>
               </div>
               <ul className="timeline-details">
                 <li>Exceeded sales targets every quarter and managed a team of employees.</li>

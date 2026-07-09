@@ -139,11 +139,13 @@
   font-size: 0.85rem;
   color: var(--text-muted);
   /* Allow wrapping so long / multi-range dates (e.g. "Sept 2021 – Aug 2023,
-     Dec 2024 – May 2026") break onto a second line instead of overflowing
-     the card. text-align:right keeps them right-anchored under the title. */
+     Dec 2024 – May 2026") break onto a second line instead of overflowing.
+     Month-year pairs are joined with a non-breaking space in JSX so wraps
+     only ever happen at commas / en-dashes — not inside "August 2023". */
   text-align: right;
-  max-width: 45%;
+  max-width: 55%;
   line-height: 1.4;
+  flex-shrink: 0;
 }
 
 .timeline-details {
