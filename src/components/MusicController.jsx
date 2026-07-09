@@ -3,61 +3,41 @@ import { useLocation } from 'react-router-dom'
 import './MusicController.css'
 
 /**
- * MusicController — plain HTML5 <audio> implementation
+ * MusicController — game music only
  *
- * Why no Howler.js anymore: Howler's HTML5 audio pool kept hitting
- * "potentially locked" states on the large WAV files, and the abstractions
- * obscured what the browser was actually doing. Going straight to the
- * platform <audio> element makes the lifecycle obvious and lets you debug
- * with the browser's normal media tooling.
+ * The site pages (Home, Resume, Education, Projects, Interests) are now
+ * silent. Music only plays while the frog game is open. This removed
+ * ~24 MB of always-preloaded audio from the main site.
  *
- * Two <audio> elements live in the DOM, one per song. The browser preloads
- * them. We swap which one is .play()-ing based on the route and toggle
- * .muted on both for the mute button.
- *
- * Autoplay rule: the first .play() must happen INSIDE the click/keydown
- * event handler — that's why the first-gesture listener calls .play()
- * synchronously rather than via setState → effect.
+ * The mute button still lives in the corner so the user can silence the
+ * game track if they want.
  */
 function MusicController() {
   const location = useLocation()
-  const siteRef = useRef(null)
   const gameRef = useRef(null)
   const [isMuted, setIsMuted] = useState(false)
-  const [hasInteracted, setHasInteracted] = useState(false)
 
-  // Refs the global unlock handler reads — using refs (not state) lets
-  // the handler see the latest route/mute without rebinding the listener.
+  const isGamePage = location.pathname === '/game'
+
+  // Refs the unlock handler reads without re-binding.
   const isMutedRef = useRef(isMuted)
-  const pathnameRef = useRef(location.pathname)
+  const isGamePageRef = useRef(isGamePage)
   isMutedRef.current = isMuted
-  pathnameRef.current = location.pathname
+  isGamePageRef.current = isGamePage
 
-  // ---- First user gesture: start the appropriate track synchronously ----
+  // ---- First user gesture (only relevant if we're on /game) ----
   useEffect(() => {
     const unlock = () => {
       window.removeEventListener('click', unlock)
       window.removeEventListener('keydown', unlock)
 
-      const isGame = pathnameRef.current === '/game'
-      const target = isGame ? gameRef.current : siteRef.current
-      const other = isGame ? siteRef.current : gameRef.current
-
-      console.log('[music] first gesture, route=', pathnameRef.current,
-        'muted=', isMutedRef.current,
-        'target loaded?', target?.readyState)
-
-      if (other) other.pause()
-      if (target && !isMutedRef.current) {
-        target.volume = isGame ? 0.35 : 0.25
-        target.currentTime = target.currentTime || 0
-        const p = target.play()
+      if (isGamePageRef.current && gameRef.current && !isMutedRef.current) {
+        gameRef.current.volume = 0.35
+        const p = gameRef.current.play()
         if (p && p.catch) {
-          p.then(() => console.log('[music] play OK'))
-           .catch((err) => console.error('[music] play() rejected:', err))
+          p.catch((err) => console.error('[music] play() rejected:', err))
         }
       }
-      setHasInteracted(true)
     }
     window.addEventListener('click', unlock)
     window.addEventListener('keydown', unlock)
@@ -67,49 +47,36 @@ function MusicController() {
     }
   }, [])
 
-  // ---- Route changes (after first interaction): swap which track plays ----
+  // ---- Route changes: play game music on /game, pause it elsewhere ----
   useEffect(() => {
-    if (!hasInteracted) return
-    const isGame = location.pathname === '/game'
-    const target = isGame ? gameRef.current : siteRef.current
-    const other = isGame ? siteRef.current : gameRef.current
-    if (other) other.pause()
-    if (target && !isMuted) {
-      target.volume = isGame ? 0.35 : 0.25
-      const p = target.play()
-      if (p && p.catch) p.catch((err) => console.error('[music] play() rejected on route:', err))
+    if (!gameRef.current) return
+    if (isGamePage && !isMuted) {
+      gameRef.current.volume = 0.35
+      const p = gameRef.current.play()
+      if (p && p.catch) p.catch(() => { /* autoplay blocked; will retry on unlock */ })
+    } else {
+      gameRef.current.pause()
     }
-  }, [location.pathname, hasInteracted, isMuted])
+  }, [isGamePage, isMuted])
 
-  // ---- Mute toggle: applies to both audio elements ----
+  // ---- Mute toggle ----
   useEffect(() => {
-    if (siteRef.current) siteRef.current.muted = isMuted
     if (gameRef.current) gameRef.current.muted = isMuted
   }, [isMuted])
 
   return (
     <>
       {/*
-        Hidden audio elements. `preload="auto"` lets the browser start
-        buffering immediately. `loop` makes them repeat forever. We DON'T
-        set `autoplay` because every browser ignores autoplay without a
-        user gesture — we call .play() ourselves on the first click.
+        preload="none" — the browser doesn't touch this file until we call
+        .play(). That means visiting the site (not the game) transfers zero
+        audio bytes.
       */}
-      <audio
-        ref={siteRef}
-        src="/music/Absolutely.wav"
-        loop
-        preload="auto"
-        onError={(e) => console.error('[music:site] load error', e.currentTarget.error)}
-        onCanPlay={() => console.log('[music:site] canplay')}
-      />
       <audio
         ref={gameRef}
         src="/music/FrogGameMusic.wav"
         loop
-        preload="auto"
+        preload="none"
         onError={(e) => console.error('[music:game] load error', e.currentTarget.error)}
-        onCanPlay={() => console.log('[music:game] canplay')}
       />
 
       <button

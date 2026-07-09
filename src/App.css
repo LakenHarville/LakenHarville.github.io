@@ -24,19 +24,16 @@
   overflow: hidden;
 }
 
+/* Orbs are now STATIC — no animation, no transform, no will-change. This
+   removes the continuous GPU work of re-blurring a 100px-radius filter on
+   every animation frame, which was the biggest paint cost on non-game
+   pages. Positions are unchanged so the composition still reads the same. */
 .bg-orb {
   position: absolute;
-  /* 50% on a non-square element gives a tall ellipse with rounded caps —
-     exactly what we want for a strand. */
   border-radius: 50%;
   filter: blur(100px);
   opacity: 0.2;
-  /* Additive blending — overlapping strands brighten into glowing pools,
-     which is what gives the motion that "flame intersecting flame" look. */
   mix-blend-mode: screen;
-  /* Hint to the browser: only transform changes, so promote to GPU and
-     don't repaint on every frame. */
-  will-change: transform;
 }
 
 .bg-orb-1 {
@@ -45,10 +42,6 @@
   background: var(--accent-primary);
   top: -250px;
   right: -40px;
-  /* Strand hangs from above, so its "base" is the top edge — pivoting there
-     makes the tip whip back and forth like a flame anchored at the wick. */
-  transform-origin: 50% 0%;
-  animation: flame-drift-1 14s ease-in-out infinite;
 }
 
 .bg-orb-2 {
@@ -57,9 +50,6 @@
   background: var(--accent-secondary);
   bottom: -200px;
   left: -20px;
-  /* Strand rises from below, base is the bottom edge. */
-  transform-origin: 50% 100%;
-  animation: flame-drift-2 17s ease-in-out infinite;
 }
 
 .bg-orb-3 {
@@ -68,8 +58,6 @@
   background: var(--accent-tertiary);
   top: 20%;
   left: 50%;
-  transform-origin: 50% 100%;
-  animation: flame-drift-3 13s ease-in-out infinite 2s;
   opacity: 0.16;
 }
 
@@ -79,8 +67,6 @@
   background: var(--accent-primary);
   top: 30%;
   right: 22%;
-  transform-origin: 50% 0%;
-  animation: flame-drift-4 15s ease-in-out infinite 1s;
   opacity: 0.15;
 }
 
@@ -90,69 +76,7 @@
   background: var(--accent-secondary);
   top: -120px;
   left: 32%;
-  transform-origin: 50% 0%;
-  animation: flame-drift-5 16s ease-in-out infinite 4s;
   opacity: 0.14;
-}
-
-/* Flame-drift keyframes
-   The wave comes from `skewX` — shear distortion — flipping sign at each
-   stage. Combined with a small rotation in the opposite direction, the
-   strand leans AND warps, the same way real flames bend in a draft.
-   More stages (6) per cycle = faster apparent flickering without speeding
-   up the overall duration. */
-
-@keyframes flame-drift-1 {
-  0%, 100% { transform: translate(0, 0) rotate(0deg) skewX(0deg) scaleY(1); }
-  15%      { transform: translate(-15px, -30px) rotate(3deg) skewX(-9deg) scaleY(1.05); }
-  32%      { transform: translate(20px, -70px) rotate(-4deg) skewX(11deg) scaleY(0.94); }
-  50%      { transform: translate(-25px, -110px) rotate(5deg) skewX(-12deg) scaleY(1.08); }
-  68%      { transform: translate(30px, -80px) rotate(-3deg) skewX(8deg) scaleY(0.96); }
-  85%      { transform: translate(-10px, -40px) rotate(2deg) skewX(-6deg) scaleY(1.03); }
-}
-
-@keyframes flame-drift-2 {
-  0%, 100% { transform: translate(0, 0) rotate(0deg) skewX(0deg) scaleY(1); }
-  16%      { transform: translate(25px, 50px) rotate(-3deg) skewX(10deg) scaleY(0.95); }
-  34%      { transform: translate(-30px, 100px) rotate(4deg) skewX(-11deg) scaleY(1.08); }
-  52%      { transform: translate(40px, 140px) rotate(-5deg) skewX(13deg) scaleY(0.92); }
-  70%      { transform: translate(-20px, 110px) rotate(3deg) skewX(-9deg) scaleY(1.06); }
-  86%      { transform: translate(15px, 60px) rotate(-2deg) skewX(7deg) scaleY(0.97); }
-}
-
-@keyframes flame-drift-3 {
-  0%, 100% { transform: translate(0, 0) rotate(0deg) skewX(0deg) scaleY(1); }
-  18%      { transform: translate(-30px, -50px) rotate(5deg) skewX(-12deg) scaleY(1.1); }
-  36%      { transform: translate(25px, -100px) rotate(-6deg) skewX(14deg) scaleY(0.9); }
-  54%      { transform: translate(-35px, 60px) rotate(7deg) skewX(-15deg) scaleY(1.12); }
-  72%      { transform: translate(40px, 30px) rotate(-4deg) skewX(10deg) scaleY(0.93); }
-  88%      { transform: translate(-15px, -40px) rotate(3deg) skewX(-8deg) scaleY(1.04); }
-}
-
-@keyframes flame-drift-4 {
-  0%, 100% { transform: translate(0, 0) rotate(0deg) skewX(0deg) scaleY(1); }
-  14%      { transform: translate(20px, -60px) rotate(-4deg) skewX(11deg) scaleY(1.06); }
-  30%      { transform: translate(-30px, -110px) rotate(5deg) skewX(-13deg) scaleY(0.93); }
-  48%      { transform: translate(35px, -80px) rotate(-6deg) skewX(12deg) scaleY(1.1); }
-  66%      { transform: translate(-25px, 40px) rotate(4deg) skewX(-10deg) scaleY(0.95); }
-  84%      { transform: translate(15px, 60px) rotate(-3deg) skewX(7deg) scaleY(1.04); }
-}
-
-@keyframes flame-drift-5 {
-  0%, 100% { transform: translate(0, 0) rotate(0deg) skewX(0deg) scaleY(1); }
-  17%      { transform: translate(25px, 70px) rotate(4deg) skewX(-10deg) scaleY(0.92); }
-  35%      { transform: translate(-30px, 110px) rotate(-5deg) skewX(13deg) scaleY(1.1); }
-  53%      { transform: translate(45px, 60px) rotate(6deg) skewX(-12deg) scaleY(0.94); }
-  71%      { transform: translate(-20px, 130px) rotate(-3deg) skewX(9deg) scaleY(1.07); }
-  87%      { transform: translate(20px, 80px) rotate(4deg) skewX(-6deg) scaleY(0.96); }
-}
-
-/* Respect the user's "reduce motion" preference. Animations on by default
-   are great, but some folks get motion sickness — freeze the orbs in place. */
-@media (prefers-reduced-motion: reduce) {
-  .bg-orb {
-    animation: none;
-  }
 }
 
 main {

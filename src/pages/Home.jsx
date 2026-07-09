@@ -23,12 +23,8 @@ function Home() {
           Sits in the top-left corner, just below the navbar header. Credits
           the two composers whose songs play on the site. */}
       <aside className="music-credits" aria-label="Music credits">
-        <h4 className="music-credits-title">Music Credits</h4>
+        <h4 className="music-credits-title">Music Credit</h4>
         <ul className="music-credits-list">
-          <li>
-            <span className="credit-label">Home Music:</span>{' '}
-            <span className="credit-name">Ryan Harville</span>
-          </li>
           <li>
             <span className="credit-label">Frog Game Music:</span>{' '}
             <span className="credit-name">Charlie Kirby</span>

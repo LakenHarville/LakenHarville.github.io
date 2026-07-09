@@ -23,10 +23,12 @@ import './App.css'
  * and crossfades music between site pages and the game.
  */
 function App() {
-  // Skip the animated background on the frog game route — the 3D scene has
-  // its own atmosphere and the orbs would compete with it.
+  // Orbs render on the Home page ONLY. They're the most expensive CSS
+  // element on the site (filter: blur(100px) + mix-blend-mode: screen), so
+  // restricting them to one page — and freezing their animation via CSS —
+  // trims a lot of continuous GPU work on Resume/Education/Projects/etc.
   const location = useLocation()
-  const showBgEffects = location.pathname !== '/game'
+  const showBgEffects = location.pathname === '/'
 
   return (
     <div className="app">
