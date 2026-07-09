@@ -36,7 +36,7 @@ function Projects() {
         'Fine-tuned the Qwen3-0.6B language model on clinical notes using HuggingFace Transformers. Handled tokenization, training optimization, and pushed the final model to HuggingFace Hub.',
       tech: ['Python', 'HuggingFace', 'PyTorch', 'NLP'],
       github: '#',
-      live: 'https://huggingface.co/RLakenHarville/qwen3-clinical-cs6810hw3',
+      live: null,
       status: 'complete',
       featured: true,
     },

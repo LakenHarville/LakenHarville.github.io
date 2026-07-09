@@ -138,7 +138,12 @@
 .timeline-date {
   font-size: 0.85rem;
   color: var(--text-muted);
-  white-space: nowrap;
+  /* Allow wrapping so long / multi-range dates (e.g. "Sept 2021 – Aug 2023,
+     Dec 2024 – May 2026") break onto a second line instead of overflowing
+     the card. text-align:right keeps them right-anchored under the title. */
+  text-align: right;
+  max-width: 45%;
+  line-height: 1.4;
 }
 
 .timeline-details {
