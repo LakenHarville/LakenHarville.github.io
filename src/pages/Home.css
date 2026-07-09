@@ -7,67 +7,6 @@
   position: relative;
 }
 
-/* ---- Music Credits (top-left, just below navbar) ----
-   The navbar is `position: fixed; z-index: 1000` and has no spacer in the
-   document flow, so we manually offset `top` to clear it. ~92px lands the
-   credits a touch below the unscrolled navbar; the mobile breakpoint uses
-   a smaller offset since the navbar collapses to roughly 60px there. */
-
-.music-credits {
-  position: absolute;
-  top: 92px;
-  left: 24px;
-  z-index: 5;
-  padding: 10px 14px;
-  background: rgba(6, 8, 13, 0.55);
-  backdrop-filter: blur(8px);
-  border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.06));
-  border-radius: var(--radius-md, 8px);
-  max-width: 240px;
-  font-size: 0.78rem;
-  line-height: 1.4;
-  color: var(--text-secondary, #8b949e);
-  pointer-events: none; /* purely informational */
-}
-
-.music-credits-title {
-  margin: 0 0 4px;
-  font-size: 0.72rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--accent-primary, #00e87b);
-  font-weight: 600;
-}
-
-.music-credits-list {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.music-credits-list li {
-  margin: 0;
-}
-
-.credit-label {
-  color: var(--text-secondary, #8b949e);
-}
-
-.credit-name {
-  color: var(--text-primary, #e6edf3);
-  font-weight: 500;
-}
-
-@media (max-width: 768px) {
-  .music-credits {
-    top: 76px;
-    left: 12px;
-    padding: 8px 10px;
-    font-size: 0.7rem;
-    max-width: 200px;
-  }
-}
-
 /* ---- Hero Section ---- */
 
 .hero {
@@ -323,6 +262,23 @@
   font-size: 0.85rem;
   color: var(--text-muted);
   line-height: 1.7;
+}
+
+/* ---- Music Credit (bottom of game CTA card) ---- */
+
+.game-cta-credit {
+  margin-top: var(--space-md);
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.06));
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  text-align: center;
+  letter-spacing: 0.01em;
+}
+
+.game-cta-credit strong {
+  color: var(--accent-primary, #00e87b);
+  font-weight: 600;
 }
 
 /* ---- Floating Decorative Emojis ---- */
